@@ -1,15 +1,195 @@
-comment: 'VHDL Bundle by Brian Padalino (ocnqnyvab@tznvy.pbz)'
-fileTypes: [
-  'vhd'
-  'vhdl'
-  'vho'
-]
 name: 'VHDL'
+scopeName: 'source.vhdl'
+fileTypes: ['vhd','vhdl','vho']
+comment: 'VHDL Bundle by Brian Padalino (ocnqnyvab@tznvy.pbz)'
 patterns: [
   { include: '#block_processing' }
   { include: '#cleanup' }]
-
 repository:
+  # Common Rules
+  cleanup:
+    patterns: [
+      { include: '#comments' }
+      { include: '#constants_numeric' }
+      { include: '#strings' }
+      { include: '#attribute_list' }
+      { include: '#syntax_highlighting' }
+    ]
+  comments:
+    patterns: [
+      {
+        match: '--.*$\\n?'
+        name: 'comment.line.double-dash.vhdl'
+      }
+    ]
+  constants_numeric:
+    patterns: [
+      {
+        match: '\\b([+\\-]?[\\d_]+\\.[\\d_]+([eE][+\\-]?[\\d_]+)?)\\b'
+        name: 'constant.numeric.floating_point.vhdl'
+      }
+      {
+        match: '\\b\\d+#[\\h_]+#\\b'
+        name: 'constant.numeric.base_pound_number_pound.vhdl'
+      }
+      {
+        match: '\\b[\\d_]+([eE][\\d_]+)?\\b'
+        name: 'constant.numeric.integer.vhdl'
+      }
+      {
+        match: '[xX]\"[0-9a-fA-F_uUxXzZwWlLhH\\-]+\"'
+        name: 'constant.numeric.quoted.double.string.hex.vhdl'
+      }
+      {
+        match: '[oO]\"[0-7_uUxXzZwWlLhH\\-]+\"'
+        name: 'constant.numeric.quoted.double.string.octal.vhdl'
+      }
+      {
+        match: '[bB]?\"[01_uUxXzZwWlLhH\\-]+\"'
+        name: 'constant.numeric.quoted.double.string.binary.vhdl'
+      }
+      {
+        captures:
+          '1': { name: 'invalid.illegal.quoted.double.string.vhdl' }
+        match: '([bBoOxX]\".+?\")'
+        name: 'constant.numeric.quoted.double.string.illegal.vhdl'
+      }
+      {
+        match: '\'[01uUxXzZwWlLhH\\-]\''
+        name: 'constant.numeric.quoted.single.std_logic'
+      }
+    ]
+  strings:
+    patterns: [
+      {
+        match: '\'.\''
+        name: 'string.quoted.single.vhdl'
+      }
+      {
+        begin: '\"'
+        end: '\"'
+        name: 'string.quoted.double.vhdl'
+        patterns: [
+          {
+            match: '\\\\.'
+            name: 'constant.character.escape.vhdl'
+          }
+        ]
+      }
+      {
+        begin: '\\\\'
+        end: '\\\\'
+        name: 'string.other.backslash.vhdl'
+      }
+    ]
+  syntax_highlighting:
+    patterns: [
+      { include: '#keywords' }
+      { include: '#punctuation' }
+      { include: '#support_constants' }
+      { include: '#support_types' }
+      { include: '#support_functions' }
+    ]
+  keywords:
+    patterns: [
+      {
+        match: '\'(?i:active|ascending|base|delayed|driving|event|high|image|instance|last|left|leftof|length|low|path|pos|pred|quiet|range|reverse|right|rightof|simple|stable|succ|transaction|val|value)\\b'
+        name: 'keyword.attributes.vhdl'
+      }
+      {
+        match: '\\b(?i:access|after|alias|all|architecture|array|assert|attribute|begin|block|body|buffer|bus|case|component|configuration|constant|disconnect|downto|else|elsif|end|entity|exit|file|for|function|generate|generic|group|guarded|if|impure|in|inertial|inout|is|label|library|linkage|literal|loop|map|next|null|of|on|open|others|out|package|port|postponed|procedure|process|protected|pure|range|record|register|reject|report|return|select|severity|shared|signal|subtype|then|to|transport|type|unaffected|units|until|use|variable|wait|when|while|with)\\b'
+        name: 'keyword.language.floating.vhdl'
+      }
+      {
+        match: '\\b(?i:abs|and|mod|nand|new|nor|not|or|rem|rol|ror|sla|sll|sra|srl|xnor|xor)\\b'
+        name: 'keyword.operator.vhdl'
+      }
+      {
+        match: '(\\+|\\-|<=|=|=>|:=|>=|>|<|/|\\||&|(\\*{1,2}))'
+        name: 'keyword.operator.vhdl'
+      }
+    ]
+  punctuation:
+    patterns: [
+      {
+        match: '(\\.|,|:|;|\\(|\\))'
+        name: 'punctuation.vhdl'
+      }
+    ]
+  support_constants:
+    patterns: [
+      {
+        match: '\\b(?i:math_1_over_e|math_1_over_pi|math_1_over_sqrt_2|math_2_pi|math_3_pi_over_2|math_deg_to_rad|math_e|math_log10_of_e|math_log2_of_e|math_log_of_10|math_log_of_2|math_pi|math_pi_over_2|math_pi_over_3|math_pi_over_4|math_rad_to_deg|math_sqrt_2|math_sqrt_pi)\\b'
+        name: 'support.constant.ieee.math_real.vhdl'
+      }
+      {
+        match: '\\b(?i:math_cbase_1|math_cbase_j|math_czero|positive_real|principal_value)\\b'
+        name: 'support.constant.ieee.math_complex.vhdl'
+      }
+      {
+        match: '\\b(?i:true|false)\\b'
+        name: 'support.constant.std.standard.vhdl'
+      }
+    ]
+  support_functions:
+    patterns: [
+      {
+        match: '\\b(?i:finish|stop|resolution_limit)\\b'
+        name: 'support.function.std.env.vhdl'
+      }
+      {
+        match: '\\b(?i:readline|read|writeline|write|endfile|endline)\\b'
+        name: 'support.function.std.textio.vhdl'
+      }
+      {
+        match: '\\b(?i:rising_edge|falling_edge|to_bit|to_bitvector|to_stdulogic|to_stdlogicvector|to_stdulogicvector|is_x)\\b'
+        name: 'support.function.ieee.std_logic_1164.vhdl'
+      }
+      {
+        match: '\\b(?i:shift_left|shift_right|rotate_left|rotate_right|resize|to_integer|to_unsigned|to_signed)\\b'
+        name: 'support.function.ieee.numeric_std.vhdl'
+      }
+      {
+        match: '\\b(?i:arccos(h?)|arcsin(h?)|arctan|arctanh|cbrt|ceil|cos|cosh|exp|floor|log10|log2|log|realmax|realmin|round|sign|sin|sinh|sqrt|tan|tanh|trunc)\\b'
+        name: 'support.function.ieee.math_real.vhdl'
+      }
+      {
+        match: '\\b(?i:arg|cmplx|complex_to_polar|conj|get_principal_value|polar_to_complex)\\b'
+        name: 'support.function.ieee.math_complex.vhdl'
+      }
+    ]
+  support_types:
+    patterns: [
+      {
+        match: '\\b(?i:boolean|bit|character|severity_level|integer|real|time|delay_length|now|natural|positive|string|bit_vector|file_open_kind|file_open_status|fs|ps|ns|us|ms|sec|min|hr|severity_level|note|warning|error|failure)\\b'
+        name: 'support.type.std.standard.vhdl'
+      }
+      {
+        match: '\\b(?i:line|text|side|width|input|output)\\b'
+        name: 'support.type.std.textio.vhdl'
+      }
+      {
+        match: '\\b(?i:std_logic|std_ulogic|std_logic_vector|std_ulogic_vector)\\b'
+        name: 'support.type.ieee.std_logic_1164.vhdl'
+      }
+      {
+        match: '\\b(?i:signed|unsigned)\\b'
+        name: 'support.type.ieee.numeric_std.vhdl'
+      }
+      {
+        match: '\\b(?i:complex|complex_polar)\\b'
+        name: 'support.type.ieee.math_complex.vhdl'
+      }
+    ]
+
+  # Outline Elements
+  block_processing:
+    patterns: [
+      { include: '#package_pattern' }
+      { include: '#package_body_pattern' }
+      { include: '#entity_pattern' }
+      { include: '#architecture_pattern' }
+    ]
   architecture_pattern:
     patterns: [
       {
@@ -59,6 +239,7 @@ repository:
           { include: '#protected_pattern' }
           { include: '#record_pattern' }
           { include: '#for_pattern' }
+          { include: '#block_pattern' }
           { include: '#entity_instantiation_pattern' }
           { include: '#component_instantiation_pattern' }
           { include: '#cleanup' }
@@ -81,12 +262,55 @@ repository:
         ]
       }
     ]
-  block_processing:
+  block_pattern:
     patterns: [
-      { include: '#package_pattern' }
-      { include: '#package_body_pattern' }
-      { include: '#entity_pattern' }
-      { include: '#architecture_pattern' }
+      {
+        begin: '''(?xi)
+              # From the beginning of the line
+              ^\\s*
+              (
+                # Optional identifier $2
+                ([a-z][a-z0-9_]*)
+                # Colon $3
+                \\s*(:)\\s*
+              )?
+              # The word block #4, then is #5
+              (block\\b)
+            '''
+        beginCaptures:
+          '2': { name: 'entity.name.section.process.begin.vhdl' }
+          '3': { name: 'punctuation.vhdl' }
+          '4': { name: 'keyword.language.vhdl' }
+        end: '''(?xi)
+              # The word end $1
+              (end)
+              # Optional word block $3
+              (\\s+(block))
+              # Optional identifier $6 or invalid identifier $7
+              (\\s+((\\2)|(.+?)))?
+              (?=\\s*;)
+            '''
+        endCaptures:
+          '1': { name: 'keyword.language.vhdl' }
+          '3': { name: 'keyword.language.vhdl' }
+          '6': { name: 'entity.name.section.process.end.vhdl' }
+          '7': { name: 'invalid.illegal.invalid.identifier.vhdl' }
+        name: 'meta.block.block.vhdl'
+        patterns: [
+            { include: '#function_definition_pattern' }
+            { include: '#procedure_definition_pattern' }
+            { include: '#component_pattern' }
+            { include: '#if_pattern' }
+            { include: '#process_pattern' }
+            { include: '#type_pattern' }
+            { include: '#protected_pattern' }
+            { include: '#record_pattern' }
+            { include: '#for_pattern' }
+            { include: '#entity_instantiation_pattern' }
+            { include: '#component_instantiation_pattern' }
+            { include: '#cleanup' }
+        ]
+      }
     ]
   case_pattern:
     patterns: [
@@ -130,21 +354,6 @@ repository:
           { include: '#control_patterns' }
           { include: '#cleanup' }
         ]
-      }
-    ]
-  cleanup:
-    patterns: [
-      { include: '#comments' }
-      { include: '#constants_numeric' }
-      { include: '#strings' }
-      { include: '#attribute_list' }
-      { include: '#syntax_highlighting' }
-    ]
-  comments:
-    patterns: [
-      {
-        match: '--.*$\\n?'
-        name: 'comment.line.double-dash.vhdl'
       }
     ]
   component_instantiation_pattern:
@@ -216,43 +425,6 @@ repository:
           { include: '#port_list_pattern' }
           { include: '#comments' }
         ]
-      }
-    ]
-  constants_numeric:
-    patterns: [
-      {
-        match: '\\b([+\\-]?[\\d_]+\\.[\\d_]+([eE][+\\-]?[\\d_]+)?)\\b'
-        name: 'constant.numeric.floating_point.vhdl'
-      }
-      {
-        match: '\\b\\d+#[\\h_]+#\\b'
-        name: 'constant.numeric.base_pound_number_pound.vhdl'
-      }
-      {
-        match: '\\b[\\d_]+([eE][\\d_]+)?\\b'
-        name: 'constant.numeric.integer.vhdl'
-      }
-      {
-        match: '[xX]\"[0-9a-fA-F_uUxXzZwWlLhH\\-]+\"'
-        name: 'constant.numeric.quoted.double.string.hex.vhdl'
-      }
-      {
-        match: '[oO]\"[0-7_uUxXzZwWlLhH\\-]+\"'
-        name: 'constant.numeric.quoted.double.string.octal.vhdl'
-      }
-      {
-        match: '[bB]?\"[01_uUxXzZwWlLhH\\-]+\"'
-        name: 'constant.numeric.quoted.double.string.binary.vhdl'
-      }
-      {
-        captures:
-          '1': { name: 'invalid.illegal.quoted.double.string.vhdl' }
-        match: '([bBoOxX]\".+?\")'
-        name: 'constant.numeric.quoted.double.string.illegal.vhdl'
-      }
-      {
-        match: '\'[01uUxXzZwWlLhH\\-]\''
-        name: 'constant.numeric.quoted.single.std_logic'
       }
     ]
   control_patterns:
@@ -602,25 +774,6 @@ repository:
         ]
       }
     ]
-  keywords:
-    patterns: [
-      {
-        match: '\'(?i:active|ascending|base|delayed|driving|event|high|image|instance|last|left|leftof|length|low|path|pos|pred|quiet|range|reverse|right|rightof|simple|stable|succ|transaction|val|value)\\b'
-        name: 'keyword.attributes.vhdl'
-      }
-      {
-        match: '\\b(?i:access|after|alias|all|architecture|array|assert|attribute|begin|block|body|buffer|bus|case|component|configuration|constant|disconnect|downto|else|elsif|end|entity|exit|file|for|function|generate|generic|group|guarded|if|impure|in|inertial|inout|is|label|library|linkage|literal|loop|map|next|null|of|on|open|others|out|package|port|postponed|procedure|process|protected|pure|range|record|register|reject|report|return|select|severity|shared|signal|subtype|then|to|transport|type|unaffected|units|until|use|variable|wait|when|while|with)\\b'
-        name: 'keyword.language.floating.vhdl'
-      }
-      {
-        match: '\\b(?i:abs|and|mod|nand|new|nor|not|or|rem|rol|ror|sla|sll|sra|srl|xnor|xor)\\b'
-        name: 'keyword.operator.vhdl'
-      }
-      {
-        match: '(\\+|\\-|<=|=|=>|:=|>=|>|<|/|\\||&|(\\*{1,2}))'
-        name: 'keyword.operator.vhdl'
-      }
-    ]
   package_body_pattern:
     patterns: [
       {
@@ -952,13 +1105,6 @@ repository:
         ]
       }
     ]
-  punctuation:
-    patterns: [
-      {
-        match: '(\\.|,|:|;|\\(|\\))'
-        name: 'punctuation.vhdl'
-      }
-    ]
   record_pattern:
     patterns: [
       {
@@ -986,29 +1132,6 @@ repository:
         ]
       }
     ]
-  strings:
-    patterns: [
-      {
-        match: '\'.\''
-        name: 'string.quoted.single.vhdl'
-      }
-      {
-        begin: '\"'
-        end: '\"'
-        name: 'string.quoted.double.vhdl'
-        patterns: [
-          {
-            match: '\\\\.'
-            name: 'constant.character.escape.vhdl'
-          }
-        ]
-      }
-      {
-        begin: '\\\\'
-        end: '\\\\'
-        name: 'string.other.backslash.vhdl'
-      }
-    ]
   subtype_pattern:
     patterns: [
       {
@@ -1033,79 +1156,6 @@ repository:
           { include: '#cleanup' }
         ]
       }
-    ]
-  support_constants:
-    patterns: [
-      {
-        match: '\\b(?i:math_1_over_e|math_1_over_pi|math_1_over_sqrt_2|math_2_pi|math_3_pi_over_2|math_deg_to_rad|math_e|math_log10_of_e|math_log2_of_e|math_log_of_10|math_log_of_2|math_pi|math_pi_over_2|math_pi_over_3|math_pi_over_4|math_rad_to_deg|math_sqrt_2|math_sqrt_pi)\\b'
-        name: 'support.constant.ieee.math_real.vhdl'
-      }
-      {
-        match: '\\b(?i:math_cbase_1|math_cbase_j|math_czero|positive_real|principal_value)\\b'
-        name: 'support.constant.ieee.math_complex.vhdl'
-      }
-      {
-        match: '\\b(?i:true|false)\\b'
-        name: 'support.constant.std.standard.vhdl'
-      }
-    ]
-  support_functions:
-    patterns: [
-      {
-        match: '\\b(?i:finish|stop|resolution_limit)\\b'
-        name: 'support.function.std.env.vhdl'
-      }
-      {
-        match: '\\b(?i:readline|read|writeline|write|endfile|endline)\\b'
-        name: 'support.function.std.textio.vhdl'
-      }
-      {
-        match: '\\b(?i:rising_edge|falling_edge|to_bit|to_bitvector|to_stdulogic|to_stdlogicvector|to_stdulogicvector|is_x)\\b'
-        name: 'support.function.ieee.std_logic_1164.vhdl'
-      }
-      {
-        match: '\\b(?i:shift_left|shift_right|rotate_left|rotate_right|resize|to_integer|to_unsigned|to_signed)\\b'
-        name: 'support.function.ieee.numeric_std.vhdl'
-      }
-      {
-        match: '\\b(?i:arccos(h?)|arcsin(h?)|arctan|arctanh|cbrt|ceil|cos|cosh|exp|floor|log10|log2|log|realmax|realmin|round|sign|sin|sinh|sqrt|tan|tanh|trunc)\\b'
-        name: 'support.function.ieee.math_real.vhdl'
-      }
-      {
-        match: '\\b(?i:arg|cmplx|complex_to_polar|conj|get_principal_value|polar_to_complex)\\b'
-        name: 'support.function.ieee.math_complex.vhdl'
-      }
-    ]
-  support_types:
-    patterns: [
-      {
-        match: '\\b(?i:boolean|bit|character|severity_level|integer|real|time|delay_length|now|natural|positive|string|bit_vector|file_open_kind|file_open_status|fs|ps|ns|us|ms|sec|min|hr|severity_level|note|warning|error|failure)\\b'
-        name: 'support.type.std.standard.vhdl'
-      }
-      {
-        match: '\\b(?i:line|text|side|width|input|output)\\b'
-        name: 'support.type.std.textio.vhdl'
-      }
-      {
-        match: '\\b(?i:std_logic|std_ulogic|std_logic_vector|std_ulogic_vector)\\b'
-        name: 'support.type.ieee.std_logic_1164.vhdl'
-      }
-      {
-        match: '\\b(?i:signed|unsigned)\\b'
-        name: 'support.type.ieee.numeric_std.vhdl'
-      }
-      {
-        match: '\\b(?i:complex|complex_polar)\\b'
-        name: 'support.type.ieee.math_complex.vhdl'
-      }
-    ]
-  syntax_highlighting:
-    patterns: [
-      { include: '#keywords' }
-      { include: '#punctuation' }
-      { include: '#support_constants' }
-      { include: '#support_types' }
-      { include: '#support_functions' }
     ]
   type_pattern:
     patterns: [
@@ -1184,4 +1234,3 @@ repository:
         ]
       }
     ]
-scopeName: 'source.vhdl'
