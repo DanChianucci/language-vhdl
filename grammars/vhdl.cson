@@ -4,62 +4,27 @@ fileTypes: [
   'vhdl'
   'vho'
 ]
-foldingStartMarker: '''(?x)
-                    # From the start of the line make sure we are not going into a comment ...
-                    ^(
-                      ([^-]-?(?!-))*?
-                        (
-                        # Check for \"keyword ... is\"
-                         (\\b(?i:architecture|case|entity|function|package|procedure)\\b(.+?)(?i:\\bis)\\b)
-                        # Check for if statements
-                        |(\\b(?i:if)\\b(.+?)(?i:generate|then)\\b)
-                        # Check for and while statements
-                        |(\\b(?i:for|while)(.+?)(?i:loop|generate)\\b)
-                        # Check for keywords that do not require an is after it
-                        |(\\b(?i:component|process|record)\\b[^;]*?$)
-                        # From the beginning of the line, check for instantiation maps
-                        |(^\\s*\\b(?i:port|generic)\\b(?i:\\s+map\\b)?\\s*\\()
-                      )
-                    )
-                    '''
-foldingStopMarker:  '''(?x)
-                    # From the start of the line ...
-                    ^(
-                      (
-                        (
-                          # Make sure we are not going into a comment ...
-                          ([^-]-?(?!-))*?
-                            (
-                              # The word end to the end of the line
-                               (?i:\\bend\\b).*$\\n?
-                            )
-                          )
-                        )
-                        # ... a close paren followed by an optional semicolon as the only thing on the line
-                          |(\\s*?\\)\\s*?;?\\s*?$\\n?
-                      )
-                    )
-                    '''
 name: 'VHDL'
 patterns: [
   { include: '#block_processing' }
   { include: '#cleanup' }]
+
 repository:
   architecture_pattern:
     patterns: [
       {
-        begin:  '''(?x)
+        begin:  '''(?xi)
                 # The word architecture $1
-                \\b((?i:architecture))\\s+
+                \\b(architecture)\\s+
 
                 # Followed up by a valid $3 or invalid identifier $4
-                (([a-zA-z][a-zA-z0-9_]*)|(.+))(?=\\s)\\s+
+                (([a-z][a-z0-9_]*)|(.+))(?=\\s)\\s+
 
                 # The word of $5
-                ((?i:of))\\s+
+                (of)\\s+
 
                 # Followed by a valid $7 or invalid identifier $8
-                (([a-zA-Z][a-zA-Z0-9_]*)|(.+?))(?=\\s*(?i:is))\\b
+                (([a-z][a-z0-9_]*)|(.+?))(?=\\s*(?i:is))\\b
                 '''
         beginCaptures:
           '1': { name: 'keyword.language.vhdl' }
@@ -68,11 +33,11 @@ repository:
           '5': { name: 'keyword.language.vhdl' }
           '7': { name: 'entity.name.type.entity.reference.vhdl' }
           '8': { name: 'invalid.illegal.invalid.identifier.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
              # The word end $1
-             \\b((?i:end))
+             \\b(end)
              # Optional word architecture $3
-             (\\s+((?i:architecture)))?
+             (\\s+(architecture))?
              # Optional same identifier $6 or illegal identifier $7
              (\\s+((\\3)|(.+?)))?
              # This will cause the previous to capture until just before the ; or $
@@ -126,29 +91,29 @@ repository:
   case_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               # Beginning of line ...
               ^\\s*
               # Optional identifier ... $3 or invalid identifier $4
               (
                 (
-                   ([a-zA-Z][a-zA-Z0-9_]*)
+                   ([a-z][a-z0-9_]*)
                   |(.+?)
                 )
                 \\s*:\\s*
               )?
               # The word case $5
-              \\b((?i:case))\\b
+              \\b(case)\\b
             '''
         beginCaptures:
           '3': { name: 'entity.name.tag.case.begin.vhdl' }
           '4': { name: 'invalid.illegal.invalid.identifier.vhdl' }
           '5': { name: 'keyword.language.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
               # The word end $1
-              \\b((?i:end))\\s*
+              \\b(end)\\s*
               # The word case $4 or invalid word $5
-              (\\s+(((?i:case))|(.*?)))
+              (\\s+((case)|(.*?)))
               # Optional identifier from before $8 or illegal $9
               (\\s+((\\2)|(.*?)))?
               # Ending with a semicolon
@@ -185,15 +150,15 @@ repository:
   component_instantiation_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               # From the beginning of the line ...
               ^\\s*
               # Match a valid identifier $1
-              ([a-zA-Z][a-zA-Z0-9_]*)
+              ([a-z][a-z0-9_]*)
               # Colon! $2
               \\s*(:)\\s*
               # Another valid identifier $3
-              ([a-zA-Z][a-zA-Z0-9_]*)\\b
+              ([a-z][a-z0-9_]*)\\b
               # Make sure we are just the other word, or the beginning of
               # a generic or port mapping
               (?=\\s*($|generic|port))
@@ -215,26 +180,26 @@ repository:
   component_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               # From the beginning of the line ...
               ^\\s*
               # The word component $1
-              \\b((?i:component))\\s+
+              \\b(component)\\s+
               # A valid identifier $3 or invalid identifier $4
               (([a-zA-Z_][a-zA-Z0-9_]*)\\s*|(.+?))(?=\\b(?i:is|port)\\b|$|--)
               # Optional word is $6
-              (\\b((?i:is\\b)))?
+              (\\b(is\\b))?
             '''
         beginCaptures:
           '1': { name: 'keyword.language.vhdl' }
           '3': { name: 'entity.name.type.component.begin.vhdl' }
           '4': { name: 'invalid.illegal.invalid.identifier.vhdl' }
           '6': { name: 'keyword.language.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
               # The word end $1
-              \\b((?i:end))\\s+
+              \\b(end)\\s+
               # The word component $3 or illegal word $4
-              (((?i:component\\b))|(.+?))(?=\\s*|;)
+              ((component\\b)|(.+?))(?=\\s*|;)
 
               # Optional identifier $7 or illegal mismatched $8
               (\\s+((\\3)|(.+?)))?(?=\\s*;)
@@ -300,24 +265,24 @@ repository:
   entity_instantiation_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               # From the beginning of the line
               ^\\s*
               # Component identifier or illegal identifier $1
-              ([a-zA-Z][a-zA-Z0-9_]*)
+              ([a-z][a-z0-9_]*)
               # Colon! $2
               \\s*(:)\\s*
               # Optional word use $4
-              (((?i:use))\\s+)?
+              ((use)\\s+)?
               # Required word entity $5
-              ((?i:entity))\\s+
+              (entity)\\s+
               # Optional library unit identifier $8 for invalid identifier $9 followed by a dot $10
               (
-                (([a-zA-Z][a-zA-Z0-9_]*)|(.+?))
+                (([a-z][a-z0-9_]*)|(.+?))
                 (\\.)
               )?
               # Entity name reference $12 or illegal identifier $13
-              (([a-zA-Z][a-zA-Z0-9_]*)|(.+?))
+              (([a-z][a-z0-9_]*)|(.+?))
               # Check to see if we are being followed by either open paren, end of line, or port or generic words
               (?=\\s*(\\(|$|(?i:port|generic)))
               # Optional architecture elaboration
@@ -325,7 +290,7 @@ repository:
                 # Open paren $16
                 \\s*(\\()\\s*
                 # Arch identifier $18 or invalid identifier $19
-                (([a-zA-Z][a-zA-Z0-9_]*)|(.+?))(?=\\s*\\))
+                (([a-z][a-z0-9_]*)|(.+?))(?=\\s*\\))
                 # Close paren $21
                 \\s*(\\))
               )?
@@ -357,11 +322,11 @@ repository:
   entity_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               # From the beginning of the line ...
               ^\\s*
               # The word entity $1
-              ((?i:entity\\b))\\s+
+              (entity\\b)\\s+
               # The identifier $3 or an invalid identifier $4
               (([a-zA-Z][a-zA-Z\\d_]*)|(.+?))(?=\\s)
             '''
@@ -369,11 +334,11 @@ repository:
           '1': { name: 'keyword.language.vhdl' }
           '3': { name: 'entity.name.type.entity.begin.vhdl' }
           '4': { name: 'invalid.illegal.invalid.identifier.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
               # The word end $1
-              \\b((?i:end\\b))
+              \\b(end\\b)
               # Optional word entity $3
-              (\\s+((?i:entity)))?
+              (\\s+(entity))?
               # Optional identifier match $6 or indentifier mismatch $7
               (\\s+((\\3)|(.+?)))?
 
@@ -397,19 +362,19 @@ repository:
   for_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               # From the beginning of the line
               ^\\s*
               (
                 # Check for an identifier $2
-                ([a-zA-Z][a-zA-Z0-9_]*)
+                ([a-z][a-z0-9_]*)
                 # Followed by a colon $3
                 \\s*(:)\\s*
               )?
               # Make sure the next word is not wait
               (?!(?i:wait\\s*))
               # The for keyword $4
-              \\b((?i:for))\\b
+              \\b(for)\\b
               # Make sure the next word is not all
               (?!\\s*(?i:all))
             '''
@@ -417,12 +382,12 @@ repository:
           '2': { name: 'entity.name.tag.for.generate.begin.vhdl' }
           '3': { name: 'punctuation.vhdl' }
           '4': { name: 'keyword.language.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
               # The word end $1
-              \\b((?i:end))\\s+
+              \\b(end)\\s+
               (
                 # Followed by generate or loop $3
-                 ((?i:generate|loop))
+                 (generate|loop)
                 # But it really is required $4
                 |(\\S+)
               )\\b
@@ -451,7 +416,7 @@ repository:
   function_definition_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               # From the beginning of the line
               ^\\s*
               # The optional word impure $1
@@ -482,13 +447,13 @@ repository:
           '5': { name: 'entity.name.function.function.begin.vhdl' }
           '6': { name: 'entity.name.function.function.begin.vhdl' }
           '7': { name: 'invalid.illegal.invalid.identifier.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
               # From the beginning of the line
               ^\\s*
               # The word end $1
-              ((?i:end))
+              (end)
               # Optional word function $3
-              (\\s+((?i:function)))?
+              (\\s+(function))?
               # Optional matched identifier $6 or mismatched identifier $7
               (\\s+((\\3|\\4|\\5)|(.+?)))?
               # Ending with whitespace and semicolon
@@ -513,7 +478,7 @@ repository:
   function_prototype_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               # From the beginning of the line
               ^\\s*
               # The optional word impure $1
@@ -583,27 +548,27 @@ repository:
   if_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               (
                 # Optional identifier $2
-                ([a-zA-Z][a-zA-Z0-9_]*)
+                ([a-z][a-z0-9_]*)
                 # Followed by a colon $3
                 \\s*(:)\\s*
               )?
               # Keyword if $4
-              \\b((?i:if))\\b
+              \\b(if)\\b
             '''
         beginCaptures:
           '2': { name: 'entity.name.tag.if.generate.begin.vhdl' }
           '3': { name: 'punctuation.vhdl' }
           '4': { name: 'keyword.language.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
               # The word end $1
-              \\b((?i:end))\\s+
+              \\b(end)\\s+
               (
                 (
                   # Optional generate or if keyword $4
-                   ((?i:generate|if))
+                   (generate|if)
                   # Keyword if or generate required $5
                   |(\\S+)
                 )\\b
@@ -659,15 +624,15 @@ repository:
   package_body_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               # The word package $1
-              \\b((?i:package))\\s+
+              \\b(package)\\s+
               # ... but we want to be a package body $2
-              ((?i:body))\\s+
+              (body)\\s+
               # The valid identifier $4 or the invalid one $5
               (([a-zA-Z][a-zA-Z\\d_]*)|(.+?))\\s+
               # ... and we end it with an is $6
-              ((?i:is))\\b
+              (is)\\b
             '''
         beginCaptures:
           '1': { name: 'keyword.language.vhdl' }
@@ -675,11 +640,11 @@ repository:
           '4': { name: 'entity.name.section.package_body.begin.vhdl' }
           '5': { name: 'invalid.illegal.invalid.identifier.vhdl' }
           '6': { name: 'keyword.language.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
               # The word end $1
-              \\b((?i:end\\b))
+              \\b(end\\b)
               # Optional word package $3 body $4
-              (\\s+((?i:package))\\s+((?i:body)))?
+              (\\s+(package)\\s+(body))?
               # Optional identifier $7 or mismatched identifier $8
               (\\s+((\\4)|(.+?)))?(?=\\s*;)'''
         endCaptures:
@@ -704,26 +669,26 @@ repository:
   package_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               # The word package $1
-              \\b((?i:package))\\s+
+              \\b(package)\\s+
               # ... but we do not want to be a package body
               (?!(?i:body))
               # The valid identifier $3 or the invalid one $4
               (([a-zA-Z][a-zA-Z\\d_]*)|(.+?))\\s+
               # ... and we end it with an is $5
-              ((?i:is))\\b
+              (is)\\b
             '''
         beginCaptures:
           '1': { name: 'keyword.language.vhdl' }
           '3': { name: 'entity.name.section.package.begin.vhdl' }
           '4': { name: 'invalid.illegal.invalid.identifier.vhdl' }
           '5': { name: 'keyword.language.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
               # The word end $1
-              \\b((?i:end\\b))
+              \\b(end\\b)
               # Optional word package $3
-              (\\s+((?i:package)))?
+              (\\s+(package))?
               # Optional identifier $6 or mismatched identifier $7
               (\\s+((\\2)|(.+?)))?(?=\\s*;)'''
         endCaptures:
@@ -807,11 +772,11 @@ repository:
   procedure_definition_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               # From the beginning of the line
               ^\\s*
               # The word function $1
-              ((?i:procedure))\\s+
+              (procedure)\\s+
               (
                 # A valid normal identifier $3
                  ([a-zA-Z][a-zA-Z\\d_]*)
@@ -828,13 +793,13 @@ repository:
           '3': { name: 'entity.name.function.procedure.begin.vhdl' }
           '4': { name: 'entity.name.function.procedure.begin.vhdl' }
           '5': { name: 'invalid.illegal.invalid.identifier.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
               # From the beginning of the line
               ^\\s*
               # The word end $1
-              ((?i:end))
+              (end)
               # Optional word function $3
-              (\\s+((?i:procedure)))?
+              (\\s+(procedure))?
               # Optional matched identifier $6 or mismatched identifier $7
               (\\s+((\\3|\\4)|(.+?)))?
               # Ending with whitespace and semicolon
@@ -859,9 +824,9 @@ repository:
   procedure_prototype_pattern:
     patterns: [
       {
-        begin: '''(?x)
-              \\b((?i:procedure))\\s+
-              (([a-zA-Z][a-zA-Z0-9_]*)|(.+?))
+        begin: '''(?xi)
+              \\b(procedure)\\s+
+              (([a-z][a-z0-9_]*)|(.+?))
               (?=\\s*(\\(|;))
             '''
         beginCaptures:
@@ -880,27 +845,27 @@ repository:
   process_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               # From the beginning of the line
               ^\\s*
               (
                 # Optional identifier $2
-                ([a-zA-Z][a-zA-Z0-9_]*)
+                ([a-z][a-z0-9_]*)
                 # Colon $3
                 \\s*(:)\\s*
               )?
               # The word process #4
-              ((?i:process))
+              (process)
             '''
         beginCaptures:
           '2': { name: 'entity.name.section.process.begin.vhdl' }
           '3': { name: 'punctuation.vhdl' }
           '4': { name: 'keyword.language.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
               # The word end $1
-              ((?i:end))
+              (end)
               # Optional word process $3
-              (\\s+((?i:process)))
+              (\\s+(process))
               # Optional identifier $6 or invalid identifier $7
               (\\s+((\\2)|(.+?)))?
               (?=\\s*;)
@@ -928,11 +893,11 @@ repository:
             '''
         beginCaptures:
           '1': { name: 'keyword.language.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
               # The word end $1
-              \\b((?i:end))
+              \\b(end)
               # The word protected $2
-              \\s+((?i:protected))
+              \\s+(protected)
               # Optional identifier $5 or invalid identifier $6
               (\\s+(([a-zA-Z][a-zA-Z\\d_]*)|(.*?)))?
               # Only whitespace and semicolons can be left
@@ -961,13 +926,13 @@ repository:
         beginCaptures:
           '1': { name: 'keyword.language.vhdl' }
           '2': { name: 'keyword.language.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
               # The word end $1
-              \\b((?i:end))
+              \\b(end)
               # The word protected $2
-              \\s+((?i:protected))
+              \\s+(protected)
               # The word body $3
-              \\s+((?i:body))
+              \\s+(body)
               # Optional identifier $6 or invalid identifier $7
               (\\s+(([a-zA-Z][a-zA-Z\\d_]*)|(.*?)))?
               # Only whitespace and semicolons can be left
@@ -1000,11 +965,11 @@ repository:
         begin: '(?i)\\brecord\\b'
         beginCaptures:
           '0': { name: 'keyword.language.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
               # The word end $1
-              \\b((?i:end))
+              \\b(end)
               # The word record $2
-              \\s+((?i:record))
+              \\s+(record)
               # Optional identifier $5 or invalid identifier $6
               (\\s+(([a-zA-Z][a-zA-Z\\d_]*)|(.*?)))?
               # Only whitespace and semicolons can be left
@@ -1047,13 +1012,13 @@ repository:
   subtype_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               # The word subtype $1
-              \\b((?i:subtype))\\s+
+              \\b(subtype)\\s+
               # Valid identifier $3 or invalid identifier $4
-              (([a-zA-Z][a-zA-Z0-9_]*)|(.+?))\\s+
+              (([a-z][a-z0-9_]*)|(.+?))\\s+
               # The word is $5
-              ((?i:is))\\b
+              (is)\\b
             '''
         beginCaptures:
           '1': { name: 'keyword.language.vhdl' }
@@ -1176,28 +1141,28 @@ repository:
   while_pattern:
     patterns: [
       {
-        begin: '''(?x)
+        begin: '''(?xi)
               # From the beginning of the line
               ^\\s*
               (
                 # Check for an identifier $2
-                ([a-zA-Z][a-zA-Z0-9_]*)
+                ([a-z][a-z0-9_]*)
                 # Followed by a colon $3
                 \\s*(:)\\s*
               )?
               # The for keyword $4
-              \\b((?i:while))\\b
+              \\b(while)\\b
             '''
         beginCaptures:
           '2': { name: '' }
           '3': { name: 'punctuation.vhdl' }
           '4': { name: 'keyword.language.vhdl' }
-        end: '''(?x)
+        end: '''(?xi)
               # The word end $1
-              \\b((?i:end))\\s+
+              \\b(end)\\s+
               (
                 # Followed by keyword loop $3
-                 ((?i:loop))
+                 (loop)
                 # But it really is required $4
                 |(\\S+)
               )\\b
